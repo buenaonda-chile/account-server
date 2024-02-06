@@ -1,5 +1,6 @@
 package com.example.accountserver.domain.user
 
+import com.example.accountserver.domain.enum.SocialProvider
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
@@ -8,6 +9,8 @@ import java.time.LocalDateTime
 class User (
     @Id
     var id: Long? = null,
+
+    var provider: SocialProvider,
 
     val socialId: String?,
 
@@ -30,6 +33,4 @@ class User (
     val createdAt: LocalDateTime = LocalDateTime.now(),
 
     var updatedAt: LocalDateTime = LocalDateTime.now(),
-) {
-    constructor(email: String, password: String) : this(null, null, email, password, null)
-}
+)
