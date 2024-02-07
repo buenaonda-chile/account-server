@@ -21,51 +21,5 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtProvider: JwtProvider
 ) {
-    suspend fun signUp(request: AuthRequest): TokenResponse {
-        if (!ObjectUtils.isEmpty(userRepository.findByEmail(request.email))) {
-            throw EmailAlreadyExistsException
-        }
 
-        val user = userRepository.save(
-            User(
-                provider = SocialProvider.LOCAL,
-                socialId = null,
-                email = request.email,
-                password = passwordEncoder.encode(request.password),
-                username = null
-            )
-        )
-
-        val accessToken = jwtProvider.createJwtToken(user)
-        val refreshToken = jwtProvider.createJwtToken(user)
-
-        refreshTokenRepository.save(
-            RefreshToken(
-                userId = user.id!!,
-                token = refreshToken,
-                tokenHash = refreshToken.sha256()
-            )
-        )
-
-        return TokenResponse(
-            accessToken = accessToken,
-            refreshToken = refreshToken,
-        )
-    }
-
-    suspend fun emailLogin(request: AuthRequest): TokenResponse {
-        val user = userRepository.findByEmail(request.email) ?: throw UserDoesNotExistsException
-
-        if (!passwordEncoder.matches(request.password, user.password)) {
-            throw WrongPasswordException
-        }
-
-        val accessToken = jwtProvider.createJwtToken(user)
-        val refreshToken = jwtProvider.createJwtToken(user)
-
-        return TokenResponse(
-            accessToken = accessToken,
-            refreshToken = refreshToken
-        )
-    }
 }

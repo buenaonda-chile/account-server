@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class AuthController(
-    private val authService: AuthService,
+    private val emailAuthService: EmailAuthService,
     private val socialAuthService: SocialAuthService
 ) {
     @PostMapping("/v1/users")
     suspend fun signUp(
         @RequestBody request: AuthRequest
     ): TokenResponse {
-        return authService.signUp(request)
+        return emailAuthService.emailSignUp(request)
     }
 
     @PostMapping
@@ -25,5 +25,13 @@ class AuthController(
         @RequestBody oAuth2RequestWithCode: OAuth2RequestWithAuthCode
     ): TokenResponse {
         return socialAuthService.socialLoginWithAuthCode(socialProvider, oAuth2RequestWithCode)
+    }
+
+    @PostMapping
+    suspend fun socialLoginWithAccessToken(
+        @PathVariable socialProvider: SocialProvider,
+        @RequestBody oAuth2RequestWithAccessToken: OAuth2RequestWithAccessToken
+    ): TokenResponse {
+        return socialAuthService.
     }
 }
