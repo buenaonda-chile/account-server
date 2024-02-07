@@ -9,6 +9,7 @@ import com.example.accountserver.error.SocialConnectFailException
 import com.example.accountserver.social.OAuth2Client
 import com.example.accountserver.social.OAuth2Response
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class SocialAuthService(
@@ -29,6 +30,17 @@ class SocialAuthService(
         return socialSignUpOrLogin(socialProvider, oAuth2Response)
     }
 
+    suspend fun socialLoginWithAccessToken(
+        socialProvider: SocialProvider,
+        oAuth2Request: OAuth2RequestWithAccessToken
+    ): TokenResponse {
+        val oAuth2Client = clients[socialProvider]!!
+
+        val oAuth2Response = oAuth2Client.getMe(oAuth2Request.accessToken)?: throw SocialConnectFailException
+
+        return socialSignUpOrLogin(socialProvider, oAuth2Response)
+    }
+
     private suspend fun socialSignUpOrLogin(
         socialProvider: SocialProvider,
         oAuth2Response: OAuth2Response
@@ -36,8 +48,9 @@ class SocialAuthService(
         val user = userRepository.findByProviderAndSocialId(socialProvider, oAuth2Response.socialId)
             ?: socialSignUp(socialProvider, oAuth2Response)
 
-        val accessToken = jwtProvider.createJwtToken(user)
-        val refreshToken = jwtProvider.createJwtToken(user)
+        val now = LocalDateTime.now()
+        val accessToken = jwtProvider.createAccessToken(user, now)
+        val refreshToken = jwtProvider.createRefreshToken(user, now)
 
         return TokenResponse(
             accessToken = accessToken,

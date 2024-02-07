@@ -11,16 +11,20 @@ class FlywayConfig(
 ) {
     @Bean(initMethod = "migrate")
     fun flyway(): Flyway {
-        val url = if (env.activeProfiles.contains("test")) {
-            env.getRequiredProperty("spring.flyway.url")
-        } else {
-            env.getRequiredProperty("spring.r2dbc.url").replace("r2dbc", "jdbc")
-        }
+        val url = this.getUrl()
         val user = env.getRequiredProperty("spring.r2dbc.username")
         val password = env.getRequiredProperty("spring.r2dbc.password")
         val config = Flyway
             .configure()
             .dataSource(url, user, password)
         return Flyway(config)
+    }
+
+    private fun getUrl(): String {
+        if (env.activeProfiles.contains("test")) {
+            return env.getRequiredProperty("spring.flyway.url")
+        }
+
+        return env.getRequiredProperty("spring.r2dbc.url").replace("r2dbc", "jdbc")
     }
 }
