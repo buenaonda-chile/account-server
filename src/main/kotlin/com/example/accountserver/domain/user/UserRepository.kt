@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserRepository:CoroutineCrudRepository<User, Long> {
-    fun findByEmail(email: String): User?
-
-    fun findByProviderAndSocialId(provider: SocialProvider, socialId: String): User?
+    suspend fun findByEmail(email: String): User?
+    suspend fun findByProviderAndSocialId(provider: SocialProvider, socialId: String): User?
+    suspend fun findAllByIdIsIn(userIds: List<Long>): List<User>
 }

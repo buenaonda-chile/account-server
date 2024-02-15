@@ -3,7 +3,9 @@ package com.example.accountserver.common
 import com.example.accountserver.domain.token.RefreshToken
 import com.example.accountserver.domain.token.RefreshTokenRepository
 import com.example.accountserver.domain.user.User
+import com.example.accountserver.error.TokenInvalidException
 import com.example.accountserver.error.UserInactiveException
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.beans.factory.annotation.Value
@@ -37,7 +39,7 @@ class JwtProvider (
     private final val refreshPrivateKeyGenerated: PrivateKey = factory.generatePrivate(refreshPrivateKeyEncoded)
 
 
-    fun createAccessToken(user: User, now: LocalDateTime): String {
+    suspend fun createAccessToken(user: User, now: LocalDateTime): String {
         val expiration = now.plusDays(1)
 
         return this.buildJwtToken(user, accessPrivateKeyGenerated, now, expiration)
@@ -63,7 +65,23 @@ class JwtProvider (
         return refreshToken
     }
 
-    private fun buildJwtToken(
+    suspend fun validateToken(
+        token: String
+    ): Claims {
+        try {
+            return Jwts.parserBuilder()
+                .setSigningKey(refreshPublicKeyGenerated)
+                .requireIssuer(issuer)
+                .build()
+                .parseClaimsJws(token)
+                .body
+        } catch (e: Exception) {
+            throw TokenInvalidException
+        }
+
+    }
+
+    private suspend fun buildJwtToken(
         user: User,
         key: PrivateKey,
         issuedAt: LocalDateTime,
