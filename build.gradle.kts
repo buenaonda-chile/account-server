@@ -38,7 +38,10 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
 
-	implementation("com.amazonaws:aws-java-sdk-secretsmanager:1.11.965")
+	implementation("software.amazon.awssdk:secretsmanager:2.17.276")
+	implementation("software.amazon.awssdk:sts:2.17.276")
+	implementation("com.amazonaws:aws-java-sdk-sns:1.12.305")
+	implementation("com.amazonaws:aws-java-sdk-ses:1.12.305")
 
 	implementation("io.jsonwebtoken:jjwt-api:0.11.2")
 	implementation("io.jsonwebtoken:jjwt-impl:0.11.2")
